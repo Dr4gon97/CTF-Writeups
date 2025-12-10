@@ -6,7 +6,7 @@
 
 **Platform:** TryHackMe
 
-**Room:** Linux CLI - Shells Bells
+**Room:** [Linux CLI - Shells Bells](https://tryhackme.com/room/linuxcli-aoc2025-o1fpqkvxti)
 
 ---
 
@@ -53,7 +53,7 @@ Using `grep` to cut through the noise, I noticed `mcskidy` had been interacting 
 
 The first interesting thing I found exploring the file system was `Documents/read-me-please.txt`. It contained a message from McSkidy with a new set of credentials for the user `eddi_knapp`, the same one we found before in `.bash_history`, and three riddles or _"easter eggs"_ that pointed to scattered "Passfrags" (password fragments).
 
-![read-me-please.txt](https://raw.githubusercontent.com/Dr4gon97/CTF-Writeups/refs/heads/main/TryHackMe/Advent%20of%20Cyber%202025/assets/mcskidy_readme.jpg)
+![read-me-please.txt](assets/mcskidy_readme.jpg)
 
 There wasn't much else to do or find as `mcskidy` so I switched user to `eddi_knapp`:
 
@@ -138,7 +138,7 @@ cat .easter_egg
 
 The file content printed an ASCII art of a bunny. True to the riddle, hiding right at the very bottom ("the tail") of the file, was the final fragment: `PASSFRAG3: c0m1Ng`.
 
-![easter egg bunny](https://raw.githubusercontent.com/Dr4gon97/CTF-Writeups/refs/heads/main/TryHackMe/Advent%20of%20Cyber%202025/assets/passfrag3_bunny.jpg)
+![easter egg bunny](assets/passfrag3_bunny.jpg)
 
 ---
 
@@ -162,7 +162,7 @@ I edited `/home/socmas/2025/wishlist.txt`, pasting in the required items (Hardwa
 
 Success! The glitching was gone, replaced by a wall of _gibberish_ base64 ciphertext waiting to be cracked. I copied this string via the provided button and saved it locally as `gibberish.txt`.
 
-![mcskidy gibberish](https://raw.githubusercontent.com/Dr4gon97/CTF-Writeups/refs/heads/main/TryHackMe/Advent%20of%20Cyber%202025/assets/mcskidy_gibberish.jpg)
+![mcskidy gibberish](assets/mcskidy_gibberish.jpg)
 
 ### OpenSSL Decryption
 
