@@ -15,7 +15,7 @@ The challenge puts us in the shoes of **Hopper** (aka Colonel Panic), a former R
 
 ## Initial Access
 
-To even begin this challenge, a specific "SideQuest Key" found in Day 1 of Advent of Cyber 2025 is required: "[Shells Bells](../Linux%20CLI%20-%20Shells%20Bells%20(SQ1).md)".
+To even begin this challenge, a specific "SideQuest Key" found in Day 1 of Advent of Cyber 2025 is required: "[Shells Bells](../Linux%20CLI%20-%20Shells%20Bells%20(SQ1)/README.md)".
 After navigating to `MACHINE_IP:21337` and entering the key, the landing page mentions unlocking some memories... the firewall "unlocked".  but the real work begins with enumeration.
 
 ## Phase 1: Reconnaissance
