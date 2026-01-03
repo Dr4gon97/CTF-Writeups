@@ -15,7 +15,7 @@ The challenge puts us in the shoes of **Hopper** (aka Colonel Panic), a former R
 
 ## Initial Access
 
-To even begin this challenge, a specific "SideQuest Key" found in Day 1 of Advent of Cyber 2025 is required: "[Shells Bells](TryHackMe/Advent of Cyber 2025/Linux CLI - Shells Bells (SQ1).md)".
+To even begin this challenge, a specific "SideQuest Key" found in Day 1 of Advent of Cyber 2025 is required: "[Shells Bells](../Linux%20CLI%20-%20Shells%20Bells%20(SQ1).md)".
 After navigating to `MACHINE_IP:21337` and entering the key, the landing page mentions unlocking some memories... the firewall "unlocked".  but the real work begins with enumeration.
 
 ## Phase 1: Reconnaissance
@@ -295,7 +295,7 @@ nc <IP> 13404
 
 I was dropped into a shell as the user `svc_vidops`.
 
-![Fakebook](Netcat Shell/svc_vidops-console.jpg)
+![Netcat Shell](assets/svc_vidops-console.jpg)
 
 ### Post-Exploitation: Why the Bypass Worked
 Now that I had file system access, I located and read `app.py` to understand the logic that had trapped me for so long.
