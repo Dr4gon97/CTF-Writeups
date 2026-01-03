@@ -1,5 +1,6 @@
 # The Great Disappearing Act (AoC 2025 SideQuest 1)
 ![Banner](assets/banner-sidequest.jpg)
+
 **Category:** Linux / CTF
 
 **Difficulty:** Hard
@@ -55,6 +56,7 @@ While inspecting the page source on port `8080`, I noticed a facility map hidden
 ```
 THM{h0**********}
 ```
+
 ![Hidden CSS Map](assets/steps.jpg)
 
 Before looking elsewhere, I attempted to exploit the login form directly. Since the backend logic seemed to rely on shell scripts (hinted by the file extensions like `escape_check.sh`), I tried various **Command Injection** payloads (e.g., `; pwd`, `$(whoami)`, `| ls`) and standard **SQL Injection** (`' OR 1=1 --`), hoping for a quick bypass or an error message. Unfortunately, the application seemingly handled the input safely, simply returning "Invalid credentials" without executing my commands.
@@ -68,7 +70,9 @@ I registered a new account:
 *  **Password** `an actually complex password` (the login didn't allow for simple passwords such as `test` lol)
 
 Once inside, the platform appeared to be populated by a few bunnies. I started gathering **OSINT** to find valid credentials for the main application.
+
 ![Fakebook](assets/fakebook.jpg)
+
 **Relevant Posts & Comments:**
 1.  **Carrotbane:** Mentions a password hint: *"Did you know that if you enter your password as a comment on a post, it appears as *'s?"*
 2.  **Guard:** Comments with `Pizza1234$`.
@@ -98,7 +102,9 @@ Combining the OSINT findings, I constructed the potential password following the
 Using the credentials `guard.hopkins@hopsecasylum.com` / `Johnnyboy1982!`, I successfully logged into the application on **Port 8080**.
 
 I could now see the facility map I showed earlier manipulating the CSS. Additionally, logging into **Port 13400** (Video Portal) provided access to the security cameras. However, the feed was fake: the first three cameras showed a "You have been jestered" loop with a bunny, and the fourth camera (Admin) was restricted with an **Unauthorized** message.
+
 ![Jester video](assets/youve_ben_jestereed.jpg)
+
 It was time to analyze how the application handles authentication to bypass these restrictions.
 
 ## Phase 4: The Rabbit Hole
@@ -201,15 +207,19 @@ Content-Type: application/json
 ```json
 {"effective_tier":"admin","ticket_id":"d64ce993-53a3..."}
 ```
+
 ![Burp Success](assets/burpsuite-success.jpg)
+
 It worked! The logic was likely inspecting the request body for the "admin" keyword but completely ignored the URL query string, while the backend application logic (likely using `request.args.get('tier')` or similar) happily accepted the URL parameter.
 
 ### The Keypad & Flag 2
 With `effective_tier: admin`, the Admin Camera finally showed the real feed. I observed a person entering a code into a keypad.
 
 **Visual Trick:** The person in the video hovers their finger over the `1` key for a while before pressing it. It looks like `111...` but listening to the audio beeps confirms the timing.
-**Decoded Pin:** `115879`
+**Pin:** `115879`
+
 ![Keypad video](assets/keypad.jpg)
+
 Entering this PIN into the console on `8080` unlocked the first part of the second flag:
 
 **Flag 2 (Part 1):**
@@ -282,9 +292,10 @@ Earlier `nmap` scans showed port 13404 was open but unresponsive to standard HTT
 nc <IP> 13404
 # Entered the token
 ```
-![Fakebook](Netcat Shell/svc_vidops-console.jpg)
 
 I was dropped into a shell as the user `svc_vidops`.
+
+![Fakebook](Netcat Shell/svc_vidops-console.jpg)
 
 ### Post-Exploitation: Why the Bypass Worked
 Now that I had file system access, I located and read `app.py` to understand the logic that had trapped me for so long.
@@ -361,6 +372,7 @@ I fixed this by changing my group membership:
 newgrp docker
 ```
 Now I had full control over the Docker daemon.
+
 ![Docker Escalation](assets/dockergrp.jpg)
 
 ### The Container Escape
@@ -377,7 +389,9 @@ docker run -v /:/mnt --rm -it alpine chroot /mnt sh
 *  **`sh`**: Spawns a shell.
 
 I was now **Root** on the host machine.
+
 ![Root Shell](assets/im-gRoot.jpg)
+
 ## Phase 8: Looting & Persistence
 
 To ensure I didn't lose this access, I generated an SSH key on my Kali machine and appended it to the target's authorized keys via the root shell:
@@ -386,7 +400,9 @@ To ensure I didn't lose this access, I generated an SSH key on my Kali machine a
 echo "ssh-rsa AAAAB3..." >> /root/.ssh/authorized_keys
 ```
 I then connected comfortably via **FileZilla** (SFTP) to browse the files.
+
 ![Filezilla SFTP](assets/filezilla.jpg)
+
 ### Recovering the Flags
 Exploring `/home/ubuntu/side-quest-2/`, I found `setup.sh`. Reading the script, I found the second flag as well as the SCADA terminal's unlock code (in a file named `scada_terminal.py`).
 
