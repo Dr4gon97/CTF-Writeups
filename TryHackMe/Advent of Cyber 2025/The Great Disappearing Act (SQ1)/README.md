@@ -1,5 +1,5 @@
 # The Great Disappearing Act (AoC 2025 SideQuest 1)
-{{INSERIRE_IMMAGINE_QUI_: logo della sidequest}}
+![Banner](assets/banner-sidequest.jpg)
 **Category:** Linux / CTF
 
 **Difficulty:** Hard
@@ -55,7 +55,7 @@ While inspecting the page source on port `8080`, I noticed a facility map hidden
 ```
 THM{h0**********}
 ```
-{{INSERIRE_IMMAGINE_QUI_: Screenshot della mappa nascosta}}
+![Hidden CSS Map](assets/steps.jpg)
 
 Before looking elsewhere, I attempted to exploit the login form directly. Since the backend logic seemed to rely on shell scripts (hinted by the file extensions like `escape_check.sh`), I tried various **Command Injection** payloads (e.g., `; pwd`, `$(whoami)`, `| ls`) and standard **SQL Injection** (`' OR 1=1 --`), hoping for a quick bypass or an error message. Unfortunately, the application seemingly handled the input safely, simply returning "Invalid credentials" without executing my commands.
 
@@ -68,7 +68,7 @@ I registered a new account:
 *  **Password** `an actually complex password` (the login didn't allow for simple passwords such as `test` lol)
 
 Once inside, the platform appeared to be populated by a few bunnies. I started gathering **OSINT** to find valid credentials for the main application.
-{{INSERIRE_IMMAGINE_QUI_: Screenshot del feed di Fakebook con i post degli utenti}}
+![Fakebook](assets/fakebook.jpg)
 **Relevant Posts & Comments:**
 1.  **Carrotbane:** Mentions a password hint: *"Did you know that if you enter your password as a comment on a post, it appears as *'s?"*
 2.  **Guard:** Comments with `Pizza1234$`.
@@ -98,7 +98,7 @@ Combining the OSINT findings, I constructed the potential password following the
 Using the credentials `guard.hopkins@hopsecasylum.com` / `Johnnyboy1982!`, I successfully logged into the application on **Port 8080**.
 
 I could now see the facility map I showed earlier manipulating the CSS. Additionally, logging into **Port 13400** (Video Portal) provided access to the security cameras. However, the feed was fake: the first three cameras showed a "You have been jestered" loop with a bunny, and the fourth camera (Admin) was restricted with an **Unauthorized** message.
-{{INSERIRE_IMMAGINE_QUI_: Screenshot del video "You have been jestered"}}
+![Jester video](assets/youve_ben_jestereed.jpg)
 It was time to analyze how the application handles authentication to bypass these restrictions.
 
 ## Phase 4: The Rabbit Hole
@@ -162,7 +162,7 @@ Content-Type: application/json
 
 I spent way too much time trying to manipulate the `tier` parameter in the JSON body to trick the server into giving me admin access. The server seemed to have a WAF or some kind of logic that sanitized the input based on my token's **actual** role.
 
-{{INSERIRE_IMMAGINE_QUI_: Screenshot di Burp Suite Repeater con tentativo fallito (effective_tier: guard)}}
+![Burp Fail](assets/burpsuite-fail.jpg)
 
 **List of Failed Attempts (Rabbit Holes):**
 1.  **Baseline Check:** Sending `tier: "guard"` returned `effective_tier: "guard"`.
@@ -201,7 +201,7 @@ Content-Type: application/json
 ```json
 {"effective_tier":"admin","ticket_id":"d64ce993-53a3..."}
 ```
-{{INSERIRE_IMMAGINE_QUI_: Screenshot di Burp Suite Repeater con il bypass riuscito (tier nell'URL)}}
+![Burp Success](assets/burpsuite-success.jpg)
 It worked! The logic was likely inspecting the request body for the "admin" keyword but completely ignored the URL query string, while the backend application logic (likely using `request.args.get('tier')` or similar) happily accepted the URL parameter.
 
 ### The Keypad & Flag 2
@@ -209,7 +209,7 @@ With `effective_tier: admin`, the Admin Camera finally showed the real feed. I o
 
 **Visual Trick:** The person in the video hovers their finger over the `1` key for a while before pressing it. It looks like `111...` but listening to the audio beeps confirms the timing.
 **Decoded Pin:** `115879`
-{{INSERIRE_IMMAGINE_QUI_: Screenshot del video in cui si vede il tastierino}}
+![Keypad video](assets/keypad.jpg)
 Entering this PIN into the console on `8080` unlocked the first part of the second flag:
 
 **Flag 2 (Part 1):**
@@ -282,7 +282,8 @@ Earlier `nmap` scans showed port 13404 was open but unresponsive to standard HTT
 nc <IP> 13404
 # Entered the token
 ```
-{{INSERIRE_IMMAGINE_QUI_: Screenshot del terminale dopo la connessione netcat e il comando id}}
+![Fakebook](Netcat Shell/svc_vidops-console.jpg)
+
 I was dropped into a shell as the user `svc_vidops`.
 
 ### Post-Exploitation: Why the Bypass Worked
@@ -360,7 +361,7 @@ I fixed this by changing my group membership:
 newgrp docker
 ```
 Now I had full control over the Docker daemon.
-{{INSERIRE_IMMAGINE_QUI_: Screenshot del terminale con l'esecuzione di diag_shell e newgrp docker}}
+![Docker Escalation](assets/dockergrp.jpg)
 
 ### The Container Escape
 Access to the Docker socket is functionally equivalent to Root access on the host. I verified the available images with `docker images` and saw `alpine`.
@@ -376,7 +377,7 @@ docker run -v /:/mnt --rm -it alpine chroot /mnt sh
 *  **`sh`**: Spawns a shell.
 
 I was now **Root** on the host machine.
-{{INSERIRE_IMMAGINE_QUI_: Screenshot della shell di root ottenuta}}
+![Root Shell](assets/im-gRoot.jpg)
 ## Phase 8: Looting & Persistence
 
 To ensure I didn't lose this access, I generated an SSH key on my Kali machine and appended it to the target's authorized keys via the root shell:
@@ -385,7 +386,7 @@ To ensure I didn't lose this access, I generated an SSH key on my Kali machine a
 echo "ssh-rsa AAAAB3..." >> /root/.ssh/authorized_keys
 ```
 I then connected comfortably via **FileZilla** (SFTP) to browse the files.
-{{INSERIRE_IMMAGINE_QUI_: Screenshot di FileZilla collegato al file system}}
+![Filezilla SFTP](assets/filezilla.jpg)
 ### Recovering the Flags
 Exploring `/home/ubuntu/side-quest-2/`, I found `setup.sh`. Reading the script, I found the second flag as well as the SCADA terminal's unlock code (in a file named `scada_terminal.py`).
 
@@ -417,7 +418,10 @@ Since the application rejected the invitation code I found in the backend script
 > "I have this JavaScript decryption logic and this encrypted Base64 string. Write a Python script to decrypt it using the 'Invitation Code' I have."
 
 Running the Python script locally worked instantly using the code from the shell script. It decrypted the payload, revealing not a confirmation message, but a URL.
-{{INSERIRE_IMMAGINE_QUI_: Screenshot dello script Python con il risultato decifrato}}
+I saved the resulting script as [`decodekey.py`](./decodekey.py).
+
+![Python decryption](assets/decoded-message.jpg)
+
 ### The Escape
 The decrypted message contained the link to a hidden, "Insane" difficulty room, marking the true conclusion of this side quest.
 
